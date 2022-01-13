@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 
 class Message(BaseModel):
-    msg: str
+    text : str
 
 app = FastAPI()
 app.add_middleware(
@@ -21,6 +21,10 @@ async def root():
     return {"message":"Hello world"}
 
 @app.post("/msg")
-async def send_msg(msg: Message):
-    l.append(msg)
+async def send_msg(msg:Message):
+    l.append(msg.text)
     return msg
+
+@app.get("/msg")
+async def get_msg():
+    return {"msg":l}
