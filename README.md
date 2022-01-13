@@ -9,17 +9,18 @@
 
 - frontend
 
-    프론트엔드 프로젝트 파일    
+    프론트엔드 프로젝트 폴더   
 
 - backend
 
-    백엔드 프로젝트 파일
+    백엔드 프로젝트 폴더
 
 ## 기술스택
 
 - frontend
     - react
     - redux
+    - storybook
 
 - backend
     - fastapi
