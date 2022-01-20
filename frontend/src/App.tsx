@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import axios from 'axios';
-import MessageBox, {BoxType} from './components/MessageBox';
+import React, {useState, useEffect} from 'react'
+import axios from 'axios'
+import MessageBox, {BoxType} from './components/MessageBox'
+import setupAxios from './cfg'
 
 const func = (data:Array<string>)=>{
   let result = []
@@ -13,23 +14,16 @@ const func = (data:Array<string>)=>{
 const App = () => {
   const [msg, setMsg] = useState('')
   const [data, setData] = useState([])
-
-  const headers = {
-    headers:{
-    'Content-type':'application/json',
-    'Accept':'application/json'
-    }
-  };
+  setupAxios()
   const onClick=()=>{
-    axios.post('http://localhost:8000/msg',
-    {"text":msg},
-    headers
+    axios.post('/msg',
+    {"text":msg}
     ).then((response)=>{
       console.log(response)
     }).catch((response)=>{
       console.log("error!")
     })
-    axios.get('http://localhost:8000/msg'
+    axios.get('/msg'
     ).then((response)=>{
       setData(response.data.msg)
     }).catch((response)=>{
