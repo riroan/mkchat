@@ -21,6 +21,8 @@
     - react
     - redux
     - storybook
+    - socket.io-client
 
 - backend
-    - fastapi
+    - nodejs
+    - socket.io-server
