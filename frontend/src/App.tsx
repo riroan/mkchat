@@ -1,53 +1,67 @@
-import React, {useState, useEffect} from 'react'
-import axios from 'axios'
-import MessageBox, {BoxType} from './components/MessageBox'
-import setupAxios from './cfg'
+import React, { useState, useEffect } from 'react'
+import MessageBox, { BoxType } from './components/MessageBox'
+import io from 'socket.io-client'
+import './App.css'
 
-const func = (data:Array<string>)=>{
-  let result = []
-  for(let i of data){
-    result.push(<MessageBox msg={i} type={BoxType.NONE}></MessageBox>)
-  }
-  return result
+type Message = {
+  name: string
+  msg: string
+  type: BoxType
 }
+const socket = io('ws://localhost:8000')
 
 const App = () => {
   const [msg, setMsg] = useState('')
-  const [data, setData] = useState([])
-  setupAxios()
-  const onClick=()=>{
-    axios.post('/msg',
-    {"text":msg}
-    ).then((response)=>{
-      console.log(response)
-    }).catch((response)=>{
-      console.log("error!")
-    })
-    axios.get('/msg'
-    ).then((response)=>{
-      setData(response.data.msg)
-    }).catch((response)=>{
-      console.log("error!")
-    })
+  const [data, setData] = useState(Array<Message>())
+  const [msgList, setMsgList] = useState([])
+  const roomName = 'Chat Room'
+  const addMessage = (nickname, message, type) => {
+    setData([...data, { name: nickname, msg: message, type: type }])
+    console.log(data)
+  }
+  const validMsg = () => {
+    return msg.replace(/\s/g, '').length !== 0
+  }
+  const handleSubmit = e => {
+    e.preventDefault()
+    socket.emit('new_message', msg)
+    addMessage('You', msg, BoxType.RIGHT)
     setMsg('')
   }
-  const onKeyPress = (e:React.KeyboardEvent)=>{
-    if (e.key==='Enter' && msg !==''){
-      onClick();
-    }
-  }
+  useEffect(() => {
+    socket.on('new_message', (nickname, message) => {
+      addMessage(nickname, message, BoxType.LEFT)
+    })
+    socket.on('welcome', nickname => {
+      addMessage(nickname, `${nickname}이 접속하셨습니다.`, BoxType.NONE)
+    })
+  }, [])
+
+  useEffect(() => {
+    const t = data.map((d, index) => (
+      <li key={index}>
+        <MessageBox msg={d.msg} type={d.type} />
+      </li>
+    ))
+    setMsgList(t)
+  }, [data])
 
   return (
     <div className="App">
-      <input type="text" value={msg} onChange={(e)=>{
-        setMsg(e.target.value)
-      }} onKeyPress={onKeyPress}/>
-      <button onClick={onClick} disabled={msg===''}>send</button>
-      <div>
-        {func(data)}
-      </div>
+      <h1>{roomName}</h1>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          value={msg}
+          onChange={e => {
+            setMsg(e.target.value)
+          }}
+        />
+        <button disabled={!validMsg()}>Send</button>
+      </form>
+      <ul>{msgList}</ul>
     </div>
   )
 }
 
-export default App;
+export default App
